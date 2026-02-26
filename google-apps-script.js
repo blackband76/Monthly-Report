@@ -32,6 +32,7 @@ function getOrCreateSheet() {
             'Name',
             'Project',
             'Key Highlights',
+            'Upcoming Focus',
             'Issues',
             'Concerns',
             'Risks',
@@ -39,7 +40,7 @@ function getOrCreateSheet() {
         ]);
 
         // Format header row
-        const headerRange = sheet.getRange(1, 1, 1, 9);
+        const headerRange = sheet.getRange(1, 1, 1, 10);
         headerRange.setFontWeight('bold');
         headerRange.setBackground('#4f46e5');
         headerRange.setFontColor('#ffffff');
@@ -50,10 +51,11 @@ function getOrCreateSheet() {
         sheet.setColumnWidth(3, 150);  // Name
         sheet.setColumnWidth(4, 250);  // Project
         sheet.setColumnWidth(5, 400);  // Key Highlights
-        sheet.setColumnWidth(6, 400);  // Issues
-        sheet.setColumnWidth(7, 400);  // Concerns
-        sheet.setColumnWidth(8, 400);  // Risks
-        sheet.setColumnWidth(9, 400);  // Need Support
+        sheet.setColumnWidth(6, 400);  // Upcoming Focus
+        sheet.setColumnWidth(7, 400);  // Issues
+        sheet.setColumnWidth(8, 400);  // Concerns
+        sheet.setColumnWidth(9, 400);  // Risks
+        sheet.setColumnWidth(10, 400); // Need Support
 
         sheet.setFrozenRows(1);
     }
@@ -117,17 +119,18 @@ function doGet(e) {
             return jsonResponse({ success: true, reports: [] });
         }
 
-        const data = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
+        const data = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
         const reports = data.map(row => ({
             id: row[0],
             submittedAt: row[1],
             name: row[2],
             project: row[3],
             keyHighlights: parseItems(row[4]),
-            issues: parseItems(row[5]),
-            concerns: parseItems(row[6]),
-            risks: parseItems(row[7]),
-            needSupport: parseItems(row[8])
+            upcomingFocus: parseItems(row[5]),
+            issues: parseItems(row[6]),
+            concerns: parseItems(row[7]),
+            risks: parseItems(row[8]),
+            needSupport: parseItems(row[9])
         }));
 
         return jsonResponse({ success: true, reports: reports });
@@ -154,6 +157,7 @@ function handleSubmit(data) {
             name,
             proj.projectName || '',
             formatItems(proj.keyHighlights || []),
+            formatItems(proj.upcomingFocus || []),
             formatItems(proj.issues || []),
             formatItems(proj.concerns || []),
             formatItems(proj.risks || []),
@@ -162,10 +166,10 @@ function handleSubmit(data) {
     });
 
     if (rows.length > 0) {
-        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 9).setValues(rows);
+        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 10).setValues(rows);
         // Enable text wrap for data columns
         const lastRow = sheet.getLastRow();
-        sheet.getRange(lastRow - rows.length + 1, 5, rows.length, 5).setWrap(true);
+        sheet.getRange(lastRow - rows.length + 1, 5, rows.length, 6).setWrap(true);
     }
 
     return jsonResponse({

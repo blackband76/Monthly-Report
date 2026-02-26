@@ -283,6 +283,11 @@ body {
     color: var(--support-color);
 }
 
+.section-icon.focus-icon {
+    background: rgba(99, 102, 241, 0.08);
+    color: #6366f1;
+}
+
 .section-header h2 {
     font-size: 1.1rem;
     font-weight: 600;
@@ -400,6 +405,12 @@ body {
     background: var(--support-bg);
     color: var(--support-color);
     border: 1px solid var(--support-border);
+}
+
+.item-number.cat-upcomingFocus {
+    background: rgba(99, 102, 241, 0.08);
+    color: #6366f1;
+    border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 .list-item .item-text {
@@ -1078,6 +1089,10 @@ body {
 
 .modal-summary .summary-section-title.support {
     color: var(--support-color);
+}
+
+.modal-summary .summary-section-title.focus {
+    color: #6366f1;
 }
 
 .modal-summary .summary-empty {

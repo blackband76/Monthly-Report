@@ -97,6 +97,7 @@ function flattenLocalReports() {
                     name: report.name,
                     project: proj.projectName,
                     keyHighlights: proj.keyHighlights || [],
+                    upcomingFocus: proj.upcomingFocus || [],
                     issues: proj.issues || [],
                     concerns: proj.concerns || [],
                     risks: proj.risks || [],
@@ -110,6 +111,7 @@ function flattenLocalReports() {
                 name: report.name,
                 project: report.project || '',
                 keyHighlights: report.keyHighlights || [],
+                upcomingFocus: report.upcomingFocus || [],
                 issues: report.issues || [],
                 concerns: report.concerns || [],
                 risks: report.risks || [],
@@ -336,6 +338,7 @@ function renderReportsTable(allRows) {
                 <td>${escapeHtml(row.name)}</td>
                 <td>${escapeHtml(row.project)}</td>
                 <td>${formatListCell(row.keyHighlights)}</td>
+                <td>${formatListCell(row.upcomingFocus)}</td>
                 <td>${formatListCell(row.issues)}</td>
                 <td>${formatListCell(row.concerns)}</td>
                 <td>${formatListCell(row.risks)}</td>
@@ -410,6 +413,7 @@ async function exportToExcel() {
         'Name': row.name,
         'Project': row.project,
         'Key Highlights': (row.keyHighlights || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
+        'Upcoming Focus': (row.upcomingFocus || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
         'Issues': (row.issues || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
         'Concerns': (row.concerns || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
         'Risks': (row.risks || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
@@ -425,6 +429,7 @@ async function exportToExcel() {
         { wch: 20 },  // Name
         { wch: 25 },  // Project
         { wch: 50 },  // Key Highlights
+        { wch: 50 },  // Upcoming Focus
         { wch: 50 },  // Issues
         { wch: 50 },  // Concerns
         { wch: 50 },  // Risks

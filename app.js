@@ -10,6 +10,7 @@ const STORAGE_KEY = 'monthlyReports';
 // ===========================
 const CATEGORIES = [
     { key: 'keyHighlight', label: 'Key Highlights', placeholder: 'Enter a key highlight...', iconClass: 'highlight-icon', icon: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+    { key: 'upcomingFocus', label: 'Upcoming Focus', placeholder: 'Enter an upcoming focus...', iconClass: 'focus-icon', icon: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>' },
     { key: 'issue', label: 'Issues', placeholder: 'Enter an issue...', iconClass: 'issue-icon', icon: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
     { key: 'concern', label: 'Concerns', placeholder: 'Enter a concern...', iconClass: 'concern-icon', icon: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
     { key: 'risk', label: 'Risks', placeholder: 'Enter a risk...', iconClass: 'risk-icon', icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
@@ -627,6 +628,7 @@ document.getElementById('reportForm').addEventListener('submit', async function 
         projectsData.push({
             projectName: projectName,
             keyHighlights: [...project.categories.keyHighlight],
+            upcomingFocus: [...project.categories.upcomingFocus],
             issues: [...project.categories.issue],
             concerns: [...project.categories.concern],
             risks: [...project.categories.risk],
@@ -670,6 +672,7 @@ document.getElementById('reportForm').addEventListener('submit', async function 
 function buildSummaryHtml(name, projectsData) {
     const catMeta = [
         { key: 'keyHighlights', label: 'Key Highlights', colorClass: 'highlight' },
+        { key: 'upcomingFocus', label: 'Upcoming Focus', colorClass: 'focus' },
         { key: 'issues', label: 'Issues', colorClass: 'issue' },
         { key: 'concerns', label: 'Concerns', colorClass: 'concern' },
         { key: 'risks', label: 'Risks', colorClass: 'risk' },
