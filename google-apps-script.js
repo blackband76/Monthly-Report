@@ -136,6 +136,30 @@ function diagnoseSheet() {
 }
 
 /**
+ * Manual utility — writes a synthetic row to prove the deployed script
+ * is writing Role at column D. After running, check row 2 in the sheet:
+ * col D must say "__ROLE_PROBE__".
+ */
+function probeSubmit() {
+    handleSubmit({
+        id: 'probe-' + Date.now(),
+        submittedAt: new Date().toISOString(),
+        name: 'Probe',
+        role: '__ROLE_PROBE__',
+        projects: [{
+            projectName: 'Probe Project',
+            keyHighlights: ['h1'],
+            upcomingFocus: [],
+            issues: [],
+            concerns: [],
+            risks: [],
+            needSupport: []
+        }]
+    });
+    Logger.log('Probe row written. Check col D of the new row.');
+}
+
+/**
  * Manual utility — DESTRUCTIVE. Wipes all data rows but keeps the header.
  * Use this to start fresh after schema issues. Run from the Apps Script editor.
  */
