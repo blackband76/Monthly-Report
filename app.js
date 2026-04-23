@@ -183,6 +183,7 @@ async function saveReportToSheets(report) {
             id: report.id,
             submittedAt: report.submittedAt,
             name: report.name,
+            role: report.role,
             projects: report.projects
         })
     });
@@ -569,6 +570,7 @@ function renderCategoryList(projectId, catKey) {
 // ===========================
 function clearForm() {
     document.getElementById('nameInput').value = '';
+    document.getElementById('roleInput').selectedIndex = 0;
     projects = [];
     projectIdCounter = 0;
     const first = createProjectData();
@@ -610,6 +612,12 @@ document.getElementById('reportForm').addEventListener('submit', async function 
         return;
     }
 
+    const role = document.getElementById('roleInput').value;
+    if (!role) {
+        document.getElementById('roleInput').focus();
+        return;
+    }
+
     const projectsData = [];
     let hasError = false;
 
@@ -640,6 +648,7 @@ document.getElementById('reportForm').addEventListener('submit', async function 
 
     const report = {
         name: name,
+        role: role,
         projects: projectsData
     };
 
@@ -648,7 +657,7 @@ document.getElementById('reportForm').addEventListener('submit', async function 
     try {
         const result = await saveReport(report);
 
-        document.getElementById('modalSummary').innerHTML = buildSummaryHtml(name, projectsData);
+        document.getElementById('modalSummary').innerHTML = buildSummaryHtml(name, role, projectsData);
         document.getElementById('successModal').classList.add('active');
 
         if (result.warning) {
@@ -669,7 +678,7 @@ document.getElementById('reportForm').addEventListener('submit', async function 
 // ===========================
 // Build Summary HTML
 // ===========================
-function buildSummaryHtml(name, projectsData) {
+function buildSummaryHtml(name, role, projectsData) {
     const catMeta = [
         { key: 'keyHighlights', label: 'Key Highlights', colorClass: 'highlight' },
         { key: 'upcomingFocus', label: 'Upcoming Focus', colorClass: 'focus' },
@@ -683,6 +692,10 @@ function buildSummaryHtml(name, projectsData) {
         <div class="summary-row">
             <span class="summary-label">Name:</span>
             <span class="summary-value">${escapeHtml(name)}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">Role:</span>
+            <span class="summary-value">${escapeHtml(role)}</span>
         </div>
     `;
 

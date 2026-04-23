@@ -14,8 +14,24 @@
 
 const SHEET_NAME = 'Reports';
 
+const EXPECTED_HEADERS = [
+    'ID',
+    'Submitted Date',
+    'Name',
+    'Role',
+    'Project',
+    'Key Highlights',
+    'Upcoming Focus',
+    'Issues',
+    'Concerns',
+    'Risks',
+    'Need Support'
+];
+
+const COLUMN_WIDTHS = [180, 160, 150, 220, 250, 400, 400, 400, 400, 400, 400];
+
 /**
- * Initialize the sheet with headers if empty
+ * Get or create the sheet. Ensures schema matches EXPECTED_HEADERS.
  */
 function getOrCreateSheet() {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -25,42 +41,117 @@ function getOrCreateSheet() {
         sheet = ss.insertSheet(SHEET_NAME);
     }
 
-    if (sheet.getLastRow() === 0) {
-        sheet.appendRow([
-            'ID',
-            'Submitted Date',
-            'Name',
-            'Project',
-            'Key Highlights',
-            'Upcoming Focus',
-            'Issues',
-            'Concerns',
-            'Risks',
-            'Need Support'
-        ]);
+    ensureSchema(sheet);
+    return sheet;
+}
 
-        // Format header row
-        const headerRange = sheet.getRange(1, 1, 1, 10);
-        headerRange.setFontWeight('bold');
-        headerRange.setBackground('#4f46e5');
-        headerRange.setFontColor('#ffffff');
+/**
+ * Write expected headers + formatting. Idempotent.
+ */
+function writeHeaders(sheet) {
+    sheet.getRange(1, 1, 1, EXPECTED_HEADERS.length).setValues([EXPECTED_HEADERS]);
+    const headerRange = sheet.getRange(1, 1, 1, EXPECTED_HEADERS.length);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#4f46e5');
+    headerRange.setFontColor('#ffffff');
+    COLUMN_WIDTHS.forEach((w, i) => sheet.setColumnWidth(i + 1, w));
+    sheet.setFrozenRows(1);
+}
 
-        // Set column widths
-        sheet.setColumnWidth(1, 180);  // ID
-        sheet.setColumnWidth(2, 160);  // Date
-        sheet.setColumnWidth(3, 150);  // Name
-        sheet.setColumnWidth(4, 250);  // Project
-        sheet.setColumnWidth(5, 400);  // Key Highlights
-        sheet.setColumnWidth(6, 400);  // Upcoming Focus
-        sheet.setColumnWidth(7, 400);  // Issues
-        sheet.setColumnWidth(8, 400);  // Concerns
-        sheet.setColumnWidth(9, 400);  // Risks
-        sheet.setColumnWidth(10, 400); // Need Support
+/**
+ * Ensure sheet schema matches EXPECTED_HEADERS.
+ * - Empty sheet: write headers.
+ * - Legacy 10-col sheet (no Role, Project at col 4): insert Role at col 4.
+ * - Otherwise: overwrite header row (data is preserved).
+ */
+function ensureSchema(sheet) {
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
 
-        sheet.setFrozenRows(1);
+    if (lastRow === 0 || lastCol === 0) {
+        writeHeaders(sheet);
+        return;
     }
 
-    return sheet;
+    const currentHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+
+    // Already matches expected schema — nothing to do.
+    const matches = currentHeaders.length >= EXPECTED_HEADERS.length &&
+        EXPECTED_HEADERS.every((h, i) => currentHeaders[i] === h);
+    if (matches) return;
+
+    // Legacy 10-col schema (pre-Role): insert a blank column at position 4
+    // so existing data rows shift correctly and Role lands in the right spot.
+    const hasRole = currentHeaders.indexOf('Role') !== -1;
+    if (!hasRole && currentHeaders[3] === 'Project') {
+        sheet.insertColumnBefore(4);
+    }
+
+    writeHeaders(sheet);
+}
+
+/**
+ * Manual utility — run this from the Apps Script editor once to fix a
+ * corrupted header row. Rewrites headers and trims any columns beyond 11.
+ * Data rows are NOT modified, so verify alignment afterward.
+ */
+function resetHeaders() {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+        Logger.log('Sheet "' + SHEET_NAME + '" not found.');
+        return;
+    }
+    const lastCol = sheet.getLastColumn();
+    if (lastCol > EXPECTED_HEADERS.length) {
+        sheet.deleteColumns(EXPECTED_HEADERS.length + 1, lastCol - EXPECTED_HEADERS.length);
+    }
+    writeHeaders(sheet);
+    Logger.log('Headers reset. Verify data alignment in row 2+.');
+}
+
+/**
+ * Manual utility — prints current sheet state to the execution log.
+ * Run from the Apps Script editor to diagnose column alignment issues.
+ */
+function diagnoseSheet() {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+        Logger.log('Sheet "' + SHEET_NAME + '" not found.');
+        return;
+    }
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    Logger.log('Rows: ' + lastRow + ', Cols: ' + lastCol);
+    if (lastCol > 0) {
+        Logger.log('Headers: ' + JSON.stringify(sheet.getRange(1, 1, 1, lastCol).getValues()[0]));
+    }
+    if (lastRow >= 2) {
+        Logger.log('Row 2: ' + JSON.stringify(sheet.getRange(2, 1, 1, lastCol).getValues()[0]));
+    }
+    if (lastRow >= 3) {
+        Logger.log('Last row: ' + JSON.stringify(sheet.getRange(lastRow, 1, 1, lastCol).getValues()[0]));
+    }
+}
+
+/**
+ * Manual utility — DESTRUCTIVE. Wipes all data rows but keeps the header.
+ * Use this to start fresh after schema issues. Run from the Apps Script editor.
+ */
+function clearAllData() {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+        Logger.log('Sheet "' + SHEET_NAME + '" not found.');
+        return;
+    }
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+        sheet.deleteRows(2, lastRow - 1);
+    }
+    ensureSchema(sheet);
+    Logger.log('Cleared all data rows. Schema enforced.');
 }
 
 /**
@@ -119,18 +210,19 @@ function doGet(e) {
             return jsonResponse({ success: true, reports: [] });
         }
 
-        const data = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
+        const data = sheet.getRange(2, 1, lastRow - 1, 11).getValues();
         const reports = data.map(row => ({
             id: row[0],
             submittedAt: row[1],
             name: row[2],
-            project: row[3],
-            keyHighlights: parseItems(row[4]),
-            upcomingFocus: parseItems(row[5]),
-            issues: parseItems(row[6]),
-            concerns: parseItems(row[7]),
-            risks: parseItems(row[8]),
-            needSupport: parseItems(row[9])
+            role: row[3],
+            project: row[4],
+            keyHighlights: parseItems(row[5]),
+            upcomingFocus: parseItems(row[6]),
+            issues: parseItems(row[7]),
+            concerns: parseItems(row[8]),
+            risks: parseItems(row[9]),
+            needSupport: parseItems(row[10])
         }));
 
         return jsonResponse({ success: true, reports: reports });
@@ -147,6 +239,7 @@ function handleSubmit(data) {
     const id = data.id || new Date().getTime().toString();
     const submittedAt = data.submittedAt || new Date().toISOString();
     const name = data.name;
+    const role = data.role || '';
     const projects = data.projects || [];
 
     const rows = [];
@@ -155,6 +248,7 @@ function handleSubmit(data) {
             id,
             submittedAt,
             name,
+            role,
             proj.projectName || '',
             formatItems(proj.keyHighlights || []),
             formatItems(proj.upcomingFocus || []),
@@ -166,10 +260,10 @@ function handleSubmit(data) {
     });
 
     if (rows.length > 0) {
-        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 10).setValues(rows);
+        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 11).setValues(rows);
         // Enable text wrap for data columns
         const lastRow = sheet.getLastRow();
-        sheet.getRange(lastRow - rows.length + 1, 5, rows.length, 6).setWrap(true);
+        sheet.getRange(lastRow - rows.length + 1, 6, rows.length, 6).setWrap(true);
     }
 
     return jsonResponse({

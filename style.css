@@ -313,7 +313,8 @@ body {
     letter-spacing: 0.05em;
 }
 
-.form-group input[type="text"] {
+.form-group input[type="text"],
+.form-group select {
     width: 100%;
     padding: 12px 16px;
     font-size: 0.95rem;
@@ -326,8 +327,20 @@ body {
     outline: none;
 }
 
-.form-group input[type="text"]:focus {
-    background: var(--bg-input-focus);
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238888a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.form-group input[type="text"]:focus,
+.form-group select:focus {
+    background-color: var(--bg-input-focus);
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px var(--accent-blue-glow);
 }

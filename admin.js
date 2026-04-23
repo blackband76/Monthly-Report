@@ -95,6 +95,7 @@ function flattenLocalReports() {
                     id: report.id,
                     submittedAt: report.submittedAt,
                     name: report.name,
+                    role: report.role || '',
                     project: proj.projectName,
                     keyHighlights: proj.keyHighlights || [],
                     upcomingFocus: proj.upcomingFocus || [],
@@ -109,6 +110,7 @@ function flattenLocalReports() {
                 id: report.id,
                 submittedAt: report.submittedAt,
                 name: report.name,
+                role: report.role || '',
                 project: report.project || '',
                 keyHighlights: report.keyHighlights || [],
                 upcomingFocus: report.upcomingFocus || [],
@@ -336,6 +338,7 @@ function renderReportsTable(allRows) {
                 <td class="cell-number">${index + 1}</td>
                 <td class="cell-date">${formatDate(row.submittedAt)}</td>
                 <td>${escapeHtml(row.name)}</td>
+                <td>${escapeHtml(row.role || '')}</td>
                 <td>${escapeHtml(row.project)}</td>
                 <td>${formatListCell(row.keyHighlights)}</td>
                 <td>${formatListCell(row.upcomingFocus)}</td>
@@ -411,6 +414,7 @@ async function exportToExcel() {
         'No.': index + 1,
         'Submitted Date': formatDate(row.submittedAt),
         'Name': row.name,
+        'Role': row.role || '',
         'Project': row.project,
         'Key Highlights': (row.keyHighlights || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
         'Upcoming Focus': (row.upcomingFocus || []).map((h, i) => `${i + 1}. ${h}`).join('\n'),
@@ -427,6 +431,7 @@ async function exportToExcel() {
         { wch: 5 },   // No.
         { wch: 18 },  // Date
         { wch: 20 },  // Name
+        { wch: 28 },  // Role
         { wch: 25 },  // Project
         { wch: 50 },  // Key Highlights
         { wch: 50 },  // Upcoming Focus
