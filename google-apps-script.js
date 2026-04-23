@@ -167,9 +167,10 @@ function formatItems(items) {
  * Parse numbered list string back to array
  */
 function parseItems(str) {
-    if (!str || str.trim() === '') return [];
-    // Check if it's a numbered list
-    const lines = str.split('\n');
+    if (str === null || str === undefined || str === '') return [];
+    const s = String(str);
+    if (s.trim() === '') return [];
+    const lines = s.split('\n');
     if (lines.length === 1 && !lines[0].match(/^\d+\.\s/)) {
         return [lines[0]];
     }
