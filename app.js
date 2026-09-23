@@ -2,7 +2,7 @@
 // Configuration
 // ===========================
 // IMPORTANT: Replace this URL with your deployed Google Apps Script Web App URL
-const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxHyASbWgYOzIHc166QfMiZoETO976P88FSjkAgaDnFekeqDMge15J6hKkEWZ3zgsOJ/exec';
+const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwn7AwprckKykBNyMFQuwsTdlmlXOP1NVrcvUJwm81RKNi13yq3Sv6gJ4dvHJ-L0JBl/exec';
 const STORAGE_KEY = 'monthlyReports';
 
 // ===========================
